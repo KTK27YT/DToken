@@ -8,10 +8,12 @@ actor Token {
   var owner : Principal = Principal.fromText("zqavz-jtvpj-uyoba-psgzb-eclsv-hmozc-qmkww-g5sv7-o76sn-77jfx-jae");
   var totalSupply : Nat = 1000000000;
   var symbol : Text = "DANG";
-
+  //This is the Token canister address
+  var tokenCanister : Principal = Principal.fromText("rrkah-fqaaa-aaaaa-aaaaq-cai");
   var balances = HashMap.HashMap<Principal, Nat>(1, Principal.equal, Principal.hash);
 
-  balances.put(owner, totalSupply);
+  balances.put(owner, totalSupply / 2);
+  balances.put(tokenCanister, totalSupply / 2);
 
   public query func balanceOf(who : Principal) : async Nat {
 
@@ -32,8 +34,8 @@ actor Token {
     // Debug.print(debug_show (msg.caller));
     if (balances.get(msg.caller) == null) {
       let amount = 10000;
-      balances.put(msg.caller, amount);
-      return "Success";
+      let result = await transfer(msg.caller, amount);
+      return result;
     };
     return "Already Claimed";
   };
