@@ -1,20 +1,24 @@
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import Debug "mo:base/Debug";
+import Iter "mo:base/Iter";
 
 actor Token {
   // Run dfx identity get-principal to get your principal id
   //Then replace it in the following line
-  var owner : Principal = Principal.fromText("zqavz-jtvpj-uyoba-psgzb-eclsv-hmozc-qmkww-g5sv7-o76sn-77jfx-jae");
-  var totalSupply : Nat = 1000000000;
-  var symbol : Text = "DANG";
+  let owner : Principal = Principal.fromText("zqavz-jtvpj-uyoba-psgzb-eclsv-hmozc-qmkww-g5sv7-o76sn-77jfx-jae");
+  let totalSupply : Nat = 1000000000;
+  let symbol : Text = "DANG";
   //This is the Token canister address
-  var tokenCanister : Principal = Principal.fromText("rrkah-fqaaa-aaaaa-aaaaq-cai");
-  var balances = HashMap.HashMap<Principal, Nat>(1, Principal.equal, Principal.hash);
+  let tokenCanister : Principal = Principal.fromText("rrkah-fqaaa-aaaaa-aaaaq-cai");
 
-  balances.put(owner, totalSupply / 2);
-  balances.put(tokenCanister, totalSupply / 2);
+  stable var balanceEntries : [(Principal, Nat)] = [];
 
+  private var balances = HashMap.HashMap<Principal, Nat>(1, Principal.equal, Principal.hash);
+  if (balances.size() < 1) {
+    balances.put(owner, totalSupply / 2);
+    balances.put(tokenCanister, totalSupply / 2);
+  };
   public query func balanceOf(who : Principal) : async Nat {
 
     //Optional Statement
@@ -54,4 +58,17 @@ actor Token {
     return "Success";
   };
 
+  system func preupgrade() {
+    balanceEntries := Iter.toArray(balances.entries());
+  };
+
+  system func postupgrade() {
+    //As I am using a more newer version of DFX SDK
+    // I had to change balanceEntries.val() to balanceEntries.vals()
+    balances := HashMap.fromIter<Principal, Nat>(balanceEntries.vals(), 1, Principal.equal, Principal.hash);
+    if (balances.size() < 1) {
+      balances.put(owner, totalSupply / 2);
+      balances.put(tokenCanister, totalSupply / 2);
+    };
+  };
 };
