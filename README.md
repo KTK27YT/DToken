@@ -16,6 +16,8 @@ dfx deploy
 npm start
 ```
 
+# Important Notes
+As episode 448, where the Internet Identity Login is introduced. For the internet identity to work, it is a must to deploy to the live internet computer which costs ICP and cycles. If you'd like to work in local host, I'd suggest to use the previous version committed before.
 
 # Check your Balance
 

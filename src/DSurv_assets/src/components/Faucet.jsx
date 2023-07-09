@@ -1,11 +1,21 @@
 import React, { useState } from "react";
+import { createActor } from "../../../declarations/DSurv/index";
+import { canisterId } from "../../../declarations/DSurv/index";
 import { DSurv } from "../../../declarations/DSurv";
+import { AuthClient } from "@dfinity/auth-client";
 function Faucet() {
   const [isDisabled, setDisabled] = useState(false);
   const [buttonText, setText] = useState("Gimme gimme");
   async function handleClick(event) {
     setDisabled(true);
-    const result = await DSurv.payOut();
+    const authClient = await AuthClient.create();
+    const identity = await authClient.getIdentity();
+    const authenticatedCanister = createActor(canisterId, {
+      agentOptions: {
+        identity,
+      },
+    });
+    const result = await authenticatedCanister.payOut();
     setText(result);
   }
 
